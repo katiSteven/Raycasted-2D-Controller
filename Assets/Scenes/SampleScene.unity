@@ -627,6 +627,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 890509858}
+  vecticalOffset: 1
+  lookAheadDstX: 4
+  lookSmoothTimeX: 0.5
+  verticalSmoothTime: 0.2
   focusAreaSize: {x: 3, y: 5}
 --- !u!20 &519420031
 Camera:
@@ -948,6 +952,7 @@ MonoBehaviour:
   horizontalRaySpacing: 0
   verticalRaySpacing: 0
   collider: {fileID: 0}
+  playerInput: {x: 0, y: 0}
 --- !u!61 &890509859
 BoxCollider2D:
   m_ObjectHideFlags: 0
