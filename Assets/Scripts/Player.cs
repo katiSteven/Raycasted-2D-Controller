@@ -3,182 +3,187 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Controller2D))]
+//[RequireComponent(typeof(Controller2D))]
 public class Player : MonoBehaviour {
 
-    [SerializeField] float maxJumpHeight = 4;
-    [SerializeField] float minJumpHeight = 1;
-    [SerializeField] float timeToJumpApex = .4f;
-    float accelerationTimeAirborne = .2f;
-    float accelerationTimeGrounded = .1f;
-    float moveSpeed = 6;
+    //protected float timeToWallUnstick;
 
-    public Vector2 wallJumpClimb;
-    public Vector2 wallJumpOff;
-    public Vector2 wallLeap;
+    //protected float gravity;
+    //protected float maxJumpVelocity;
+    //protected float minJumpVelocity;
+    //protected Vector3 velocity;
+    //protected float velocityXSmoothing;
+    //protected Vector2 directionalInput;
 
-    public float wallSlideSpeedMax = 3;
-    public float wallStickTime = 0.25f;
-    float timeToWallUnstick;
-
-    float gravity;
-    float maxJumpVelocity;
-    float minJumpVelocity;
-    private Vector3 velocity;
-    float velocityXSmoothing;
-
-    [HideInInspector] public Controller2D controller;
-
-    Vector2 directionalInput;
-    bool wallSliding;
-    int wallDirX;
-    bool isJumping;
+    //protected Controller2D controller;
+    //protected PlayerManager playerManager;
+    //protected Arm arm;
+    //protected Wrist wrist;
 
 
-    //bool ledgeGrabbing;
-    [SerializeField] public float ArmLength = 1f;
-    [SerializeField] public float WristLength = 0.1f;
-    //public GameObject wrist { get; set; }
-    public Wrist wristScript { get; set; }
+    //protected bool wallSliding;
+    //protected int wallDirX;
+    //protected bool isJumping;
+    //protected bool ledgeGrabbing;
 
-    public Vector3 Velocity { get => velocity; set => velocity = value; }
+    public Info playerInfo;
 
-    private void Awake() {
-        controller = GetComponent<Controller2D>();
-        controller.ArmLength = ArmLength;
-        controller.WristLength = WristLength;
+    public virtual void Awake() {
+        playerInfo.playerManager = FindObjectOfType<PlayerManager>();
+        playerInfo.controller = GetComponent<Controller2D>();
+        playerInfo.arm = GetComponentInChildren<Arm>();
+    }
+
+    private void OnEnable()
+    {
+        PlayerManager.OnDirectionalInput += SetDirectionalInput;
+        PlayerManager.OnJumpInputDown += OnJumpInputDown;
+        PlayerManager.OnJumpInputUp += OnJumpInputUp;
+    }
+
+    private void OnDisable()
+    {
+        PlayerManager.OnDirectionalInput -= SetDirectionalInput;
+        PlayerManager.OnJumpInputDown -= OnJumpInputDown;
+        PlayerManager.OnJumpInputUp -= OnJumpInputUp;
     }
 
     void Start() {
-        
-        gravity = -(2 * maxJumpHeight) / Mathf.Pow(timeToJumpApex, 2);
-        maxJumpVelocity = Mathf.Abs(gravity) * timeToJumpApex;
-        minJumpVelocity = Mathf.Sqrt(2 * Mathf.Abs(gravity) * minJumpHeight);
-        print("Gravity: " + gravity + " Jump Velocity: " + maxJumpVelocity);
+        playerInfo.gravity = -(2 * playerInfo.playerManager.maxJumpHeight) / Mathf.Pow(playerInfo.playerManager.timeToJumpApex, 2);
+        playerInfo.maxJumpVelocity = Mathf.Abs(playerInfo.gravity) * playerInfo.playerManager.timeToJumpApex;
+        playerInfo.minJumpVelocity = Mathf.Sqrt(2 * Mathf.Abs(playerInfo.gravity) * playerInfo.playerManager.minJumpHeight);
+        print("Gravity: " + playerInfo.gravity + " Jump Velocity: " + playerInfo.maxJumpVelocity);
     }
 
-    void Update() {
-        CalculateVelocity();
-        HandleWallSliding();
-
-        controller.Move(velocity * Time.deltaTime, directionalInput);
-
-        if (controller.collisions.above || controller.collisions.below) {
-            if (controller.collisions.slidingDownMaxSlope) {
-                velocity.y += controller.collisions.slopeNormal.y * -gravity * Time.deltaTime;
-            } else {
-                velocity.y = 0;
-            }
-        }
-        if (controller.collisions.Grabbing())
+    public virtual void Update() {
+        
+        if (playerInfo.wrist == null)
         {
-            print("Grab detected 1");
-            //wrist = FindObjectOfType<Wrist>().gameObject;
-            if (wristScript != null)
+            CalculateVelocity();
+            HandleWallSliding();
+            //if (arm.wristScript == null)
+            //{
+            //    CalculateVelocity();
+            //    HandleWallSliding();
+            //    controller.Move(velocity * Time.deltaTime, directionalInput);
+            //}
+            playerInfo.controller.Move(playerInfo.velocity * Time.deltaTime, playerInfo.directionalInput);
+            if (playerInfo.controller.collisions.above || playerInfo.controller.collisions.below)
             {
-                print("wristScript detected 1");
-                //wristScript = wrist.GetComponent<Wrist>();
-                wristScript.ledgeGrabbing = true;
-                //wristScript.DisablePlayerMovement();
-                controller.enabled = false;
-                enabled = false;
-                print("reached");
+                if (playerInfo.controller.collisions.slidingDownMaxSlope)
+                {
+                    playerInfo.velocity.y += playerInfo.controller.collisions.slopeNormal.y * -playerInfo.gravity * Time.deltaTime;
+                }
+                else
+                {
+                    playerInfo.velocity.y = 0;
+                }
             }
         }
     }
 
     public void SetDirectionalInput(Vector2 input) {
-        directionalInput = input;
+        playerInfo.directionalInput = input;
     }
 
     public void OnJumpInputDown() {
-        isJumping = true;
-        if (wallSliding) {
-            if (wallDirX == directionalInput.x) {
-                velocity.x = -wallDirX * wallJumpClimb.x;
-                velocity.y = wallJumpClimb.y;
-            } else if (directionalInput.x == 0) {
-                velocity.x = -wallDirX * wallJumpOff.x;
-                velocity.y = wallJumpOff.y;
+        playerInfo.isJumping = true;
+        if (playerInfo.wallSliding) {
+            if (playerInfo.wallDirX == playerInfo.directionalInput.x) {
+                playerInfo.velocity.x = -playerInfo.wallDirX * playerInfo.playerManager.wallJumpClimb.x;
+                playerInfo.velocity.y = playerInfo.playerManager.wallJumpClimb.y;
+            } else if (playerInfo.directionalInput.x == 0) {
+                playerInfo.velocity.x = -playerInfo.wallDirX * playerInfo.playerManager.wallJumpOff.x;
+                playerInfo.velocity.y = playerInfo.playerManager.wallJumpOff.y;
             } else {
-                velocity.x = -wallDirX * wallLeap.x;
-                velocity.y = wallLeap.y;
+                playerInfo.velocity.x = -playerInfo.wallDirX * playerInfo.playerManager.wallLeap.x;
+                playerInfo.velocity.y = playerInfo.playerManager.wallLeap.y;
             }
         }
-        if (controller.collisions.below || CheckLedgeGrabbingActive()) {
-            if (controller.collisions.slidingDownMaxSlope) {
-                if (directionalInput.x != -Mathf.Sign(controller.collisions.slopeNormal.x)) { //not jumping against max slope
-                    velocity.y = maxJumpHeight * controller.collisions.slopeNormal.y;
-                    velocity.x = maxJumpHeight * controller.collisions.slopeNormal.x;
+        // && !arm.CheckLedgeGrabbingActive()()
+        if (playerInfo.controller.collisions.below && !playerInfo.ledgeGrabbing) {
+            if (playerInfo.controller.collisions.slidingDownMaxSlope) {
+                if (playerInfo.directionalInput.x != -Mathf.Sign(playerInfo.controller.collisions.slopeNormal.x)) { //not jumping against max slope
+                    playerInfo.velocity.y = playerInfo.playerManager.maxJumpHeight * playerInfo.controller.collisions.slopeNormal.y;
+                    playerInfo.velocity.x = playerInfo.playerManager.maxJumpHeight * playerInfo.controller.collisions.slopeNormal.x;
                 }
             } else {
-                velocity.y = maxJumpVelocity;
+                playerInfo.velocity.y = playerInfo.maxJumpVelocity;
             }
         }
     }
 
     public void OnJumpInputUp() {
-        if (velocity.y > minJumpVelocity) {
-            velocity.y = minJumpVelocity;
+        if (playerInfo.velocity.y > playerInfo.minJumpVelocity) {
+            playerInfo.velocity.y = playerInfo.minJumpVelocity;
         }
-        isJumping = false;
+        playerInfo.isJumping = false;
     }
 
     void HandleWallSliding() {
-        wallDirX = (controller.collisions.left) ? -1 : 1;
-        wallSliding = false;
-        if ((controller.collisions.left || controller.collisions.right) && !controller.collisions.below && velocity.y < 0 && !CheckLedgeGrabbingActive()) {
-            wallSliding = true;
+        playerInfo.wallDirX = (playerInfo.controller.collisions.left) ? -1 : 1;
+        playerInfo.wallSliding = false;
+        if ((playerInfo.controller.collisions.left || playerInfo.controller.collisions.right) && !playerInfo.controller.collisions.below && playerInfo.velocity.y < 0 && !playerInfo.ledgeGrabbing) {
+            playerInfo.wallSliding = true;
 
-            if (velocity.y < -wallSlideSpeedMax) {
-                velocity.y = -wallSlideSpeedMax;
+            if (playerInfo.velocity.y < -playerInfo.playerManager.wallSlideSpeedMax) {
+                playerInfo.velocity.y = -playerInfo.playerManager.wallSlideSpeedMax;
             }
 
-            if (timeToWallUnstick > 0) {
-                velocityXSmoothing = 0;
-                velocity.x = 0;
+            if (playerInfo.timeToWallUnstick > 0) {
+                playerInfo.velocityXSmoothing = 0;
+                playerInfo.velocity.x = 0;
 
-                if (directionalInput.x != wallDirX && directionalInput.x != 0) {
-                    timeToWallUnstick -= Time.deltaTime;
+                if (playerInfo.directionalInput.x != playerInfo.wallDirX && playerInfo.directionalInput.x != 0) {
+                    playerInfo.timeToWallUnstick -= Time.deltaTime;
                 } else {
-                    timeToWallUnstick = wallStickTime;
+                    playerInfo.timeToWallUnstick = playerInfo.playerManager.wallStickTime;
                 }
             } else {
-                timeToWallUnstick = wallStickTime;
+                playerInfo.timeToWallUnstick = playerInfo.playerManager.wallStickTime;
             }
         }
     }
 
     void CalculateVelocity() {
-        float targetVelocityX = directionalInput.x * moveSpeed;
-        velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (controller.collisions.below) ? accelerationTimeGrounded : accelerationTimeAirborne);
-        velocity.y += gravity * Time.deltaTime;
+        float targetVelocityX = playerInfo.directionalInput.x * playerInfo.playerManager.moveSpeed;
+        playerInfo.velocity.x = Mathf.SmoothDamp(playerInfo.velocity.x, targetVelocityX, ref playerInfo.velocityXSmoothing, (playerInfo.controller.collisions.below) ? playerInfo.playerManager.accelerationTimeGrounded : playerInfo.playerManager.accelerationTimeAirborne);
+        playerInfo.velocity.y += playerInfo.gravity * Time.deltaTime;
     }
 
-    public void GrabInputdown(Vector2 grabDirectionalInput) {
-        //if (!controller.collisions.Grabbing()) {
+    public void DisablePlayerMovement()
+    {
+        enabled = false;
+        playerInfo.controller.enabled = false;
+    }
+
+    void GainFootHold() {
+        if (playerInfo.controller._collider.tag == "Player") {
             
-        //}
-
-         if(!CheckLedgeGrabbingActive()) {
-            controller.GrappleCollisions(velocity * Time.deltaTime, grabDirectionalInput);
         }
     }
+    public struct Info
+    {
+        public float timeToWallUnstick;
 
-    bool CheckLedgeGrabbingActive() {
-        if (wristScript != null) {
-            if (wristScript.ledgeGrabbing) {
-                return true;
-            }
-        }
-        return false;
+        public float gravity;
+        public float maxJumpVelocity;
+        public float minJumpVelocity;
+        public Vector3 velocity;
+        public float velocityXSmoothing;
+        public Vector2 directionalInput;
+
+        public PlayerManager playerManager;
+        public Controller2D controller;
+        //public 
+        public Arm arm;
+        public Wrist wrist;
+
+
+        public bool wallSliding;
+        public int wallDirX;
+        public bool isJumping;
+        public bool ledgeGrabbing;
     }
-
-    //public void GrabRelease() {
-    //    if (ledgeGrabbing) {
-    //        ledgeGrabbing = false;
-    //        controller.collisions.ResetGrab();
-    //    }
-    //}
 }
-//LedgeCollider
+

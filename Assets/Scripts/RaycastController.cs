@@ -2,16 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(BoxCollider2D))]
+//[RequireComponent(typeof(BoxCollider2D))]
 public class RaycastController : MonoBehaviour
 {
     public LayerMask collisionMask;
     public LayerMask edgeMask;
+    public LayerMask objectMask;
 
     public const float skinWidth = .015f;
     const float dstBetweenRays = 0.25f;
 
-    protected float armLength = 0.75f;
+    protected float armLength; //0.75f;//get it directly from Player Manager
 
     [HideInInspector]
     public int horizontalRayCount;
@@ -28,32 +29,38 @@ public class RaycastController : MonoBehaviour
     public float armLengthRaySpacing;
 
     [HideInInspector]
-    public BoxCollider2D collider;
+    public Collider2D _collider;
     public RaycastOrigins raycastOrigins;
 
+    protected PlayerManager playerManager;
+
     public virtual void Awake() {
-        collider = GetComponent<BoxCollider2D>();
+        //_collider = (GetComponent<EdgeCollider2D>())? GetComponent<EdgeCollider2D>() : GetComponent<BoxCollider2D>();
+        if (GetComponent<EdgeCollider2D>()) { _collider = GetComponent<EdgeCollider2D>(); }
+        else { _collider = GetComponent<BoxCollider2D>(); }
+        playerManager = FindObjectOfType<PlayerManager>();
+        armLength = playerManager.ArmLength;
     }
     public virtual void Start() {
         CalculateRaySpacing();
     }
 
     public void UpdateRaycastOrigins() {
-        Bounds bounds = collider.bounds;
+        Bounds bounds = _collider.bounds;
         bounds.Expand(skinWidth * -2);
 
         raycastOrigins.bottomLeft = new Vector2(bounds.min.x, bounds.min.y);
         raycastOrigins.bottomRight = new Vector2(bounds.max.x, bounds.min.y);
         raycastOrigins.topLeft = new Vector2(bounds.min.x, bounds.max.y);
         raycastOrigins.topRight = new Vector2(bounds.max.x, bounds.max.y);
-        raycastOrigins.centerLeft = new Vector2(bounds.min.x, bounds.center.y);
-        raycastOrigins.centerRight = new Vector2(bounds.max.x, bounds.center.y);
-        raycastOrigins.topCenter = new Vector2(bounds.center.x, bounds.max.y);
-        raycastOrigins.bottomCenter = new Vector2(bounds.center.x, bounds.min.y);
+        raycastOrigins.leftEdge = new Vector2(bounds.min.x, bounds.center.y);
+        raycastOrigins.rightEdge = new Vector2(bounds.max.x, bounds.center.y);
+        raycastOrigins.topEdge = new Vector2(bounds.center.x, bounds.max.y);
+        raycastOrigins.center = new Vector2(bounds.center.x, bounds.center.y);
     }
 
     public void CalculateRaySpacing() {
-        Bounds bounds = collider.bounds;
+        Bounds bounds = _collider.bounds;
         bounds.Expand(skinWidth * -2);
 
         float boundsWidth = bounds.size.x;
@@ -68,22 +75,22 @@ public class RaycastController : MonoBehaviour
         armLengthRaySpacing = armLength / (armLengthRayCount - 1);
     }
 
-    public Vector2 CalculateGrabOrigins(Vector2 input) {
-        if (input.x == -1f && input.y == -1f) { return raycastOrigins.bottomLeft; }
-        else if (input.x == -1f && input.y == 0f) { return raycastOrigins.centerLeft; }
+    public Vector2 CalculateFinalWristPlacement(Vector2 input) {
+        if (input.x == -1f && input.y == -1f) { return raycastOrigins.leftEdge; }
+        else if (input.x == -1f && input.y == 0f) { return raycastOrigins.leftEdge; }
         else if (input.x == -1f && input.y == 1f) { return raycastOrigins.topLeft; }
-        else if (input.x == 0f && input.y == 1f) { return raycastOrigins.topCenter; }
+        else if (input.x == 0f && input.y == 1f) { return raycastOrigins.topEdge; }
         else if (input.x == 1f && input.y == 1f) { return raycastOrigins.topRight; }
-        else if (input.x == 1f && input.y == 0f) { return raycastOrigins.centerRight; }
-        else if (input.x == 1f && input.y == -1f) { return raycastOrigins.bottomRight; }
-        else if (input.x == 0f && input.y == -1f) { return raycastOrigins.bottomCenter; }
+        else if (input.x == 1f && input.y == 0f) { return raycastOrigins.rightEdge; }
+        else if (input.x == 1f && input.y == -1f) { return raycastOrigins.rightEdge; }
+        else if (input.x == 0f && input.y == -1f) { return raycastOrigins.center; }
         return Vector2.zero;
     }
 
     public struct RaycastOrigins {
         public Vector2 topLeft, topRight;
         public Vector2 bottomLeft, bottomRight;
-        public Vector2 centerLeft, centerRight;
-        public Vector2 topCenter, bottomCenter;
+        public Vector2 leftEdge, rightEdge;
+        public Vector2 topEdge, center;
     }
 }

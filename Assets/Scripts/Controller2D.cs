@@ -11,22 +11,11 @@ public class Controller2D : RaycastController {
     public CollisionInfo collisions;
     [HideInInspector]
     public Vector2 playerInput;
-
-    public float ArmLength { get; set; }
-    public float WristLength { get; set; }
-    [SerializeField] GameObject wrist;
-    BoxCollider2D wristBoxCollider2D;
-
-    public GameObject WristInstance;
+    
 
     public override void Start() {
-        armLength = ArmLength;
         base.Start();
         collisions.faceDir = 1;
-        //if (gameObject.tag == "Player") {
-        //    wrist = GetComponentInChildren<Controller2D>().gameObject;
-        //    if (wrist != null) { wristBoxCollider2D = wrist.GetComponent<BoxCollider2D>(); }
-        //}
     }
 
     public void Move(Vector2 moveAmount, bool standingOnPlatform) {
@@ -193,7 +182,7 @@ public class Controller2D : RaycastController {
                     }
                     if (playerInput.y == -1) {
                         collisions.fallingThroughPlatform = true;
-                        Invoke("ResetFallingThroughPlatform", 0.5f);
+                        Invoke("ResetFallingThroughPlatform", 0.205f);
                         continue;
                     }
                 }
@@ -230,66 +219,6 @@ public class Controller2D : RaycastController {
         collisions.fallingThroughPlatform = false;
     }
 
-    public void GrappleCollisions(Vector2 moveAmount, Vector2 input) {
-        if (gameObject.tag == "Player") {
-            float directionY = Mathf.Sign(moveAmount.y);
-            float directionX = collisions.faceDir;
-            float rayLength = Mathf.Abs(moveAmount.y);
-
-            Vector2 rayCastOrigins = CalculateGrabOrigins(input); ;
-            for (int i = 0; i < armLengthRayCount; i++)
-            {
-                Vector2 rayOrigin = rayCastOrigins;
-                rayOrigin += input * (armLengthRaySpacing * i);
-                RaycastHit2D hit = Physics2D.Raycast(rayOrigin, ((input.x == 0f) ? new Vector2(directionX, directionY) : Vector2.up * directionY), WristLength, collisionMask);
-
-                Debug.DrawRay(rayOrigin, ((input.x == 0f) ? new Vector2(directionX, directionY) : Vector2.up * directionY) * WristLength, Color.red);
-
-                if (hit)
-                {
-                    float slopeAngle = Vector2.Angle(((input.x == 0f) ? Vector2.right * directionX : Vector2.up), hit.normal);
-
-                    print("hit normal: " + hit.normal + " hit.distance: " + hit.distance + " Grab Angle: " + slopeAngle);
-                    if (slopeAngle <= maxGrabAngle && hit.distance > 0f)
-                    {
-                        GrabCollisionDetection(rayCastOrigins);
-                        //transform.position = new Vector2(transform.position.x, hit.collider.ClosestPoint(hit.point).y - transform.localScale.y / 2);
-                        //hit.collider.bounds.max.y
-                        LedgeCollisions(hit, moveAmount);
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    public void LedgeCollisions(RaycastHit2D contactPoint, Vector2 moveAmount) {
-        if (gameObject.tag == "Player")
-        {
-            WristInstance = Instantiate(wrist) as GameObject;
-            wristBoxCollider2D = WristInstance.GetComponent<BoxCollider2D>();
-            WristInstance.transform.position = contactPoint.collider.ClosestPoint(contactPoint.point) + new Vector2(0, wristBoxCollider2D.bounds.size.y);
-        }
-        //if (wrist != null && gameObject.tag == "Player") {
-        //    print("YES");
-        //    //wrist.transform.position = contactPoint.collider.ClosestPoint(contactPoint.point) + new Vector2(0,wristBoxCollider2D.bounds.center.y);
-        //    wrist.SetActive(true);
-        //    print("Ok");
-        //}
-    }
-
-    public void GrabCollisionDetection(Vector2 rayOrigin) {
-        print("rayOrigin " + rayOrigin + " raycastOrigins.topCenter " + raycastOrigins.topCenter);
-        if (rayOrigin == raycastOrigins.bottomLeft) { collisions.bottomLeftGrab = true; }
-        else if (rayOrigin == raycastOrigins.centerLeft) { collisions.leftGrab = true; }
-        else if (rayOrigin == raycastOrigins.topLeft) { collisions.topLeftGrab = true; }
-        else if (rayOrigin == raycastOrigins.topCenter) { print("Top Grab"); collisions.topGrab = true; }
-        else if (rayOrigin == raycastOrigins.topRight) { collisions.topRightGrab = true; }
-        else if (rayOrigin == raycastOrigins.centerRight) { collisions.rightGrab = true; }
-        else if (rayOrigin == raycastOrigins.bottomRight) { collisions.bottomRightGrab = true; }
-        else if (rayOrigin == raycastOrigins.bottomCenter) { collisions.bottomGrab = true; }
-    }
-
     public struct CollisionInfo {
         public bool above, below;
         public bool left, right;
@@ -303,18 +232,6 @@ public class Controller2D : RaycastController {
 
         public bool fallingThroughPlatform;
 
-        public bool leftGrab, rightGrab, topGrab, bottomGrab;
-        public bool topLeftGrab, topRightGrab, bottomLeftGrab, bottomRightGrab;
-
-        public bool Grabbing() {
-            if (leftGrab || rightGrab || topGrab || bottomGrab ||
-                topLeftGrab || topRightGrab || bottomLeftGrab || bottomRightGrab) {
-                print("Grab detected 1");
-                return true;
-            }
-            return false;
-        }
-
         public void Reset() {
             above = below = false;
             left = right = false;
@@ -325,9 +242,49 @@ public class Controller2D : RaycastController {
             slopeAngleOld = slopeAngle;
             slopeAngle = 0;
         }
-        public void ResetGrab() {
+        public bool leftGrab, rightGrab, topGrab, bottomGrab;
+        public bool topLeftGrab, topRightGrab, bottomLeftGrab, bottomRightGrab;
+
+        public bool leftPickUp, rightPickUp, topPickUp, bottomPickUp;
+        public bool topLeftPickUp, topRightPickUp, bottomLeftPickUp, bottomRightPickUp;
+
+        public bool holdingObject;
+        public RaycastHit2D objectHit;
+
+        public bool Grabbing()
+        {
+            if (leftGrab || rightGrab || topGrab || bottomGrab ||
+                topLeftGrab || topRightGrab || bottomLeftGrab || bottomRightGrab)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public bool PickingUp()
+        {
+            if (leftPickUp || rightPickUp || topPickUp || bottomPickUp ||
+                topLeftPickUp || topRightPickUp || bottomLeftPickUp || bottomRightPickUp)
+            {
+                return true;
+            }
+            return false;
+        }
+        public void ResetGrab()
+        {
             leftGrab = rightGrab = topGrab = bottomGrab = false;
             topLeftGrab = topRightGrab = bottomLeftGrab = bottomRightGrab = false;
+        }
+
+        public void ResetPickUp()
+        {
+            leftPickUp = rightPickUp = topPickUp = bottomPickUp = false;
+            topLeftPickUp = topRightPickUp = bottomLeftPickUp = bottomRightPickUp = false;
+        }
+
+        public void DropObjectHeld()
+        {
+            holdingObject = false;
         }
     }
 }

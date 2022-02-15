@@ -22,11 +22,11 @@ public class CameraFollow : MonoBehaviour
     bool lookAheadStopped;
 
     private void Start() {
-        focusArea = new FocusArea(target.collider.bounds, focusAreaSize);
+        focusArea = new FocusArea(target._collider.bounds, focusAreaSize);
     }
 
     private void LateUpdate() {
-        focusArea.Update(target.collider.bounds);
+        focusArea.Update(target._collider.bounds);
 
         Vector2 focusPosition = focusArea.center + Vector2.up * vecticalOffset;
 

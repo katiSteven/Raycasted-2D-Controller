@@ -5,7 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - PassablePlatform
-  - LedgeCollider
+  - Wrist
   layers:
   - Default
   - TransparentFX
@@ -15,7 +15,7 @@ TagManager:
   - UI
   - Player
   - Obstacle
-  - 
+  - PhysicalObject
   - 
   - 
   - 
