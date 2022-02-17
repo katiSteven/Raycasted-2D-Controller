@@ -9,7 +9,7 @@ public class Equipment : MonoBehaviour
     [SerializeField] float maxJumpHeight = 4;
     [SerializeField] float timeToJumpApex = .4f;
     [SerializeField] float moveSpeed = 6;
-    [SerializeField] [Range(-1f,1f)] float directionX;
+    [SerializeField] [Range(-1f,1f)] float directionX; //0.5f
     
     float gravity;
     [HideInInspector] public float maxJumpVelocity;
@@ -20,6 +20,7 @@ public class Equipment : MonoBehaviour
     bool isbouncing = false;
     bool isInitialbounce = true;
     [HideInInspector] public Controller2D controller;
+    public ItemInfo itemInfo;
 
     private void Awake() {
         controller = GetComponent<Controller2D>();
@@ -27,13 +28,16 @@ public class Equipment : MonoBehaviour
 
     void Start() {
         gravity = -(2 * maxJumpHeight) / Mathf.Pow(timeToJumpApex, 2);
-        //gravity = -(maxJumpHeight) / Mathf.Pow(timeToJumpApex, 2);
         maxJumpVelocity = Mathf.Abs(gravity) * timeToJumpApex;
         print(gameObject.name + ": Gravity: " + gravity + " Jump Velocity: " + maxJumpVelocity);
         Invoke("ItemDropMovement", Time.deltaTime);
     }
 
-    
+    public void SetDirectionalInput(Vector2 input) {
+        directionalInput = input;
+    }
+
+
     void Update() {
         CalculateVelocity();
         controller.Move(velocity * Time.deltaTime, directionalInput);
@@ -45,14 +49,11 @@ public class Equipment : MonoBehaviour
 
                     velocity = Vector2.SmoothDamp(velocity * new Vector2(1, -1), Vector2.zero, ref currentVelocity, bounceTime * Time.deltaTime);
                 }
-            }
-            else
-            {
+            } else {
                 velocity = Vector2.zero;
             }
         }
-        else if(!isInitialbounce)
-        {
+        else if(!isInitialbounce) {
             isbouncing = true;
             StartCoroutine("StopBouncing");
         }
@@ -79,5 +80,9 @@ public class Equipment : MonoBehaviour
         isbouncing = false;
         isInitialbounce = false;
         StopCoroutine("StopBouncing");
+    }
+
+    public struct ItemInfo {
+        public bool isPickedUp;
     }
 }

@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-//[RequireComponent(typeof(Player))]
 public class PlayerInput : MonoBehaviour {
     PlayerManager playerManager;
 
@@ -15,16 +14,19 @@ public class PlayerInput : MonoBehaviour {
         Vector2 grabDirectionalInput = new Vector2(Input.GetAxisRaw("Grab Horizontal"), Input.GetAxisRaw("Grab Vertical"));
 
         PlayerManager.ExecuteDirectionalUserInput(directionalInput);
-        if (grabDirectionalInput != Vector2.zero) {
-            PlayerManager.ExecuteGrabDirectionalUserInput(grabDirectionalInput);
-        }
-        if (Input.GetAxisRaw("Jump") != 0f) {
+        PlayerManager.ExecuteGrabDirectionalUserInput(grabDirectionalInput);
+        if (Input.GetAxisRaw("Jump") != 0f)
+        {
             PlayerManager.ExecuteJumpInputDownUserInput();
-        } else {
+        }
+        else if (Input.GetAxis("Climb Ledge") != 0f) {
+            PlayerManager.ExecuteClimbLedge();
+        }
+        else
+        {
             PlayerManager.ExecuteJumpInputUpUserInput();
         }
-        if (Input.GetAxisRaw("Grab Release") != 0f)
-        {
+        if (Input.GetAxisRaw("Grab Release") != 0f) {
             PlayerManager.ExecuteGrabRelease();
         }
     }

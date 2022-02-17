@@ -57,6 +57,7 @@ public class RaycastController : MonoBehaviour
         raycastOrigins.rightEdge = new Vector2(bounds.max.x, bounds.center.y);
         raycastOrigins.topEdge = new Vector2(bounds.center.x, bounds.max.y);
         raycastOrigins.center = new Vector2(bounds.center.x, bounds.center.y);
+        raycastOrigins.bottomEdge = new Vector2(bounds.center.x, bounds.min.y);
     }
 
     public void CalculateRaySpacing() {
@@ -87,10 +88,23 @@ public class RaycastController : MonoBehaviour
         return Vector2.zero;
     }
 
+    public Vector2 CalculateFinalObjectPlacement(Vector2 input)
+    {
+        if (input.x == -1f && input.y == -1f) { return raycastOrigins.bottomLeft; }
+        else if (input.x == -1f && input.y == 0f) { return raycastOrigins.leftEdge; }
+        else if (input.x == -1f && input.y == 1f) { return raycastOrigins.topLeft; }
+        else if (input.x == 0f && input.y == 1f) { return raycastOrigins.topEdge; }
+        else if (input.x == 1f && input.y == 1f) { return raycastOrigins.topRight; }
+        else if (input.x == 1f && input.y == 0f) { return raycastOrigins.rightEdge; }
+        else if (input.x == 1f && input.y == -1f) { return raycastOrigins.bottomRight; }
+        else if (input.x == 0f && input.y == -1f) { return raycastOrigins.bottomEdge; }
+        else { return raycastOrigins.center; }
+    }
+
     public struct RaycastOrigins {
         public Vector2 topLeft, topRight;
         public Vector2 bottomLeft, bottomRight;
         public Vector2 leftEdge, rightEdge;
-        public Vector2 topEdge, center;
+        public Vector2 topEdge, center, bottomEdge;
     }
 }

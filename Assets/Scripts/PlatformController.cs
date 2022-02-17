@@ -189,6 +189,3 @@ public class PlatformController : RaycastController {
         }
     }
 }
-//Tags-
-//Obstacle
-//PassablePlatform

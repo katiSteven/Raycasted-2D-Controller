@@ -173,16 +173,21 @@ public class Controller2D : RaycastController {
             Debug.DrawRay(rayOrigin, Vector2.up * directionY, Color.red);
 
             if (hit) {
-                if (hit.collider.tag == "PassablePlatform") {
-                    if (directionY == 1 || hit.distance == 0) {
+                collisions.floorHit = hit;
+                if (hit.collider.tag == "PassablePlatform")
+                {
+                    if (directionY == 1 || hit.distance == 0)
+                    {
                         continue;
                     }
-                    if (collisions.fallingThroughPlatform) {
+                    if (collisions.fallingThroughPlatform)
+                    {
                         continue;
                     }
-                    if (playerInput.y == -1) {
+                    if (playerInput.y == -1 && !collisions.Grabbing())
+                    {
                         collisions.fallingThroughPlatform = true;
-                        Invoke("ResetFallingThroughPlatform", 0.205f);
+                        Invoke("ResetFallingThroughPlatform", 0.2f);
                         continue;
                     }
                 }
@@ -230,6 +235,7 @@ public class Controller2D : RaycastController {
         public Vector2 moveAmountOld;
         public int faceDir;
 
+        public RaycastHit2D floorHit;
         public bool fallingThroughPlatform;
 
         public void Reset() {
