@@ -6,6 +6,7 @@ public class Equipment : MonoBehaviour
 {
     [SerializeField] float startAfterSeconds;
     [SerializeField] float bounceTime = 3f;
+    [SerializeField] float bounceValue = 3f;
     [SerializeField] float maxJumpHeight = 4;
     [SerializeField] float timeToJumpApex = .4f;
     [SerializeField] float moveSpeed = 6;
@@ -15,6 +16,7 @@ public class Equipment : MonoBehaviour
     [HideInInspector] public float maxJumpVelocity;
     private Vector3 velocity;
     Vector2 directionalInput;
+    float currentDirectionX;
     Vector2 currentVelocity;
     
     bool isbouncing = false;
@@ -42,6 +44,7 @@ public class Equipment : MonoBehaviour
         CalculateVelocity();
 
         controller.Move(velocity * Time.deltaTime, directionalInput);
+        directionalInput.x = Mathf.SmoothDamp(directionalInput.x, 0, ref currentDirectionX, bounceTime);
         if (controller.collisions.above || controller.collisions.below) {
             if (isbouncing) {
                 if (controller.collisions.slidingDownMaxSlope) {
@@ -50,9 +53,9 @@ public class Equipment : MonoBehaviour
                     //print("Floor was hit " + controller.collisions.floorHit);
                     //print(controller.collisions.slopeNormal);
                     if (controller.collisions.floorHit) {
-                        directionalInput.x = Mathf.Sign(controller.collisions.floorHit.normal.x) * Time.deltaTime;
+                        //velocity = (Vector2)velocity + Reflect(controller.collisions.floorHit.point, controller.collisions.floorHit.normal);
                     }
-                    velocity = Vector2.SmoothDamp(velocity * new Vector2(1, -1), Vector2.zero, ref currentVelocity, bounceTime * Time.deltaTime);
+                    velocity = Vector2.SmoothDamp(velocity * new Vector2(1, -1) , Vector2.zero, ref currentVelocity, bounceTime * Time.deltaTime);
                 }
             } else {
                 velocity = Vector2.zero;
@@ -62,7 +65,10 @@ public class Equipment : MonoBehaviour
             isbouncing = true;
             StartCoroutine("StopBouncing");
         }
+        
     }
+
+    
 
     void CalculateVelocity() {
         velocity.x += directionalInput.x * moveSpeed;
@@ -80,7 +86,7 @@ public class Equipment : MonoBehaviour
     IEnumerator StopBouncing() {
         CancelInvoke("ItemDropMovement");
         yield return new WaitForSeconds(Time.deltaTime * bounceTime);
-        directionalInput.x = 0f;
+        //directionalInput.x -= Time.deltaTime * bounceTime;
 
         yield return new WaitForSeconds(bounceTime);
         isbouncing = false;

@@ -101,6 +101,10 @@ public class Controller2D : RaycastController {
                     collisions.left = directionX == -1;
                     collisions.right = directionX == 1;
                 }
+                if (tag == "Equipment")
+                {
+                    moveAmount += Reflect(hit.point, hit.normal);
+                }
             }
         }
     }
@@ -198,6 +202,9 @@ public class Controller2D : RaycastController {
 
                 collisions.below = directionY == -1;
                 collisions.above = directionY == 1;
+                if (tag == "Equipment") {
+                    moveAmount += Reflect(hit.point, hit.normal);
+                }
             }
         }
         if (collisions.climbingSlope) {
@@ -215,21 +222,42 @@ public class Controller2D : RaycastController {
                 }
             }
         }
-        if (tag == "Player") {
-            if (raycastHits[verticalRayCount - 1].collider != null) {
-                if (raycastHits[verticalRayCount - 1].transform.GetComponent<PlatformController>() || raycastHits[verticalRayCount - 1].transform.tag == "PassablePlatform") {
-                    Bounds platformBounds = raycastHits[verticalRayCount - 1].collider.bounds;
-                    collisions.otherColliderLeftVertex = new Vector2(platformBounds.min.x, platformBounds.min.y);
-                    collisions.otherColliderRightVertex = new Vector2(platformBounds.max.x, platformBounds.max.y);
-                }
-            } else if (raycastHits[0].collider != null) {
-                if (raycastHits[0].transform.GetComponent<PlatformController>() || raycastHits[0].transform.tag == "PassablePlatform") {
-                    Bounds platformBounds = raycastHits[0].collider.bounds;
-                    collisions.otherColliderLeftVertex = new Vector2(platformBounds.min.x, platformBounds.max.y);
-                    collisions.otherColliderRightVertex = new Vector2(platformBounds.max.x, platformBounds.min.y);
-                }
+        if (tag == "Player")
+        {
+            WristLedgeCollisions(raycastHits);
+        }
+    }
+
+    public static Vector2 Reflect(Vector2 v, Vector2 normal)
+    {
+        var dp = 2 * Vector2.Dot(v, normal);
+        return new Vector2(v.x - normal.x * dp, v.y - normal.y * dp);
+    }
+
+    private void WristLedgeCollisions(RaycastHit2D[] raycastHits)
+    {
+        if (raycastHits[verticalRayCount - 1].collider != null)
+        {
+            if (raycastHits[verticalRayCount - 1].transform.GetComponent<PlatformController>() || raycastHits[verticalRayCount - 1].transform.tag == "PassablePlatform")
+            {
+                Bounds platformBounds = raycastHits[verticalRayCount - 1].collider.bounds;
+                collisions.otherColliderLeftVertex = new Vector2(platformBounds.min.x, platformBounds.min.y);
+                collisions.otherColliderRightVertex = new Vector2(platformBounds.max.x, platformBounds.max.y);
             }
         }
+        else if (raycastHits[0].collider != null)
+        {
+            if (raycastHits[0].transform.GetComponent<PlatformController>() || raycastHits[0].transform.tag == "PassablePlatform")
+            {
+                Bounds platformBounds = raycastHits[0].collider.bounds;
+                collisions.otherColliderLeftVertex = new Vector2(platformBounds.min.x, platformBounds.max.y);
+                collisions.otherColliderRightVertex = new Vector2(platformBounds.max.x, platformBounds.min.y);
+            }
+        }
+    }
+
+    public void WristLedgeCollisions() {
+        
     }
 
     void ResetFallingThroughPlatform() {
