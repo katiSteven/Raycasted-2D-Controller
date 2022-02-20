@@ -50,5 +50,9 @@ public class PlayerManager : MonoBehaviour {
     public static void ExecuteJumpInputDownUserInput() { OnJumpInputDown(); }
     public static void ExecuteJumpInputUpUserInput() { OnJumpInputUp(); }
     public static void ExecuteGrabRelease() { OnGrabRelease(); }
-    public static void ExecuteClimbLedge() { OnClimbLedge(); }
+    public static void ExecuteClimbLedge() {
+        if (OnClimbLedge != null) {
+            OnClimbLedge();
+        }
+    }
 }

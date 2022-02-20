@@ -29,7 +29,7 @@ public class Equipment : MonoBehaviour
     void Start() {
         gravity = -(2 * maxJumpHeight) / Mathf.Pow(timeToJumpApex, 2);
         maxJumpVelocity = Mathf.Abs(gravity) * timeToJumpApex;
-        print(gameObject.name + ": Gravity: " + gravity + " Jump Velocity: " + maxJumpVelocity);
+        //print(gameObject.name + ": Gravity: " + gravity + " Jump Velocity: " + maxJumpVelocity);
         Invoke("ItemDropMovement", Time.deltaTime);
     }
 
@@ -40,13 +40,18 @@ public class Equipment : MonoBehaviour
 
     void Update() {
         CalculateVelocity();
+
         controller.Move(velocity * Time.deltaTime, directionalInput);
         if (controller.collisions.above || controller.collisions.below) {
             if (isbouncing) {
                 if (controller.collisions.slidingDownMaxSlope) {
                     velocity.y += controller.collisions.slopeNormal.y * -gravity * Time.deltaTime;
                 } else {
-
+                    //print("Floor was hit " + controller.collisions.floorHit);
+                    //print(controller.collisions.slopeNormal);
+                    if (controller.collisions.floorHit) {
+                        directionalInput.x = Mathf.Sign(controller.collisions.floorHit.normal.x) * Time.deltaTime;
+                    }
                     velocity = Vector2.SmoothDamp(velocity * new Vector2(1, -1), Vector2.zero, ref currentVelocity, bounceTime * Time.deltaTime);
                 }
             } else {
@@ -76,6 +81,7 @@ public class Equipment : MonoBehaviour
         CancelInvoke("ItemDropMovement");
         yield return new WaitForSeconds(Time.deltaTime * bounceTime);
         directionalInput.x = 0f;
+
         yield return new WaitForSeconds(bounceTime);
         isbouncing = false;
         isInitialbounce = false;

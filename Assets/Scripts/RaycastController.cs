@@ -10,7 +10,7 @@ public class RaycastController : MonoBehaviour
     public LayerMask objectMask;
 
     public const float skinWidth = .015f;
-    const float dstBetweenRays = 0.25f;
+    const float dstBetweenRays = 0.20f;
 
     protected float armLength; //0.75f;//get it directly from Player Manager
 
@@ -70,6 +70,8 @@ public class RaycastController : MonoBehaviour
         horizontalRayCount = Mathf.RoundToInt(boundsHeight / dstBetweenRays);
         verticalRayCount = Mathf.RoundToInt(boundsWidth / dstBetweenRays);
         armLengthRayCount = Mathf.RoundToInt(armLength / dstBetweenRays);
+        //add logic to display error in console or popup in inspector when ray count is less than 3, for all the 3 fields above
+        //at least 3 rays should be present. 2 positioned at the collider vertices & 1 in the middle. for proper collision detection.
 
         horizontalRaySpacing = boundsHeight / (horizontalRayCount - 1);
         verticalRaySpacing = boundsWidth / (verticalRayCount - 1);

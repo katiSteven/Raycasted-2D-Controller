@@ -69,7 +69,6 @@ public class Controller2D : RaycastController {
                 if (hit.distance == 0) {
                     continue;
                 }
-
                 float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
 
                 if (i == 0 && slopeAngle <= maxSlopeAngle) {
@@ -84,7 +83,13 @@ public class Controller2D : RaycastController {
                     }
                     ClimbSlope(ref moveAmount, slopeAngle, hit.normal);
                     moveAmount.x += distanceToSlopeStart * directionX;
+                    if (hit.collider.tag == "PassablePlatform" && tag == "Player") {
+                        if (playerInput.y == -1 && !collisions.Grabbing()) {
+                            moveAmount.y = (moveAmount.y + skinWidth) * -2;
+                        }
+                    }
                 }
+                if (hit.collider.tag == "PassablePlatform" && tag == "Player") { continue; }
 
                 if (!collisions.climbingSlope || slopeAngle > maxSlopeAngle) {
                     moveAmount.x = (hit.distance - skinWidth) * directionX;
@@ -164,38 +169,30 @@ public class Controller2D : RaycastController {
     void VerticalCollisions(ref Vector2 moveAmount) {
         float directionY = Mathf.Sign(moveAmount.y);
         float rayLength = Mathf.Abs(moveAmount.y) + skinWidth;
-
+        RaycastHit2D[] raycastHits = new RaycastHit2D[verticalRayCount];
         for (int i = 0; i < verticalRayCount; i++) {
             Vector2 rayOrigin = (directionY == -1) ? raycastOrigins.bottomLeft : raycastOrigins.topLeft;
             rayOrigin += Vector2.right * (verticalRaySpacing * i + moveAmount.x);
             RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.up * directionY, rayLength, collisionMask);
 
             Debug.DrawRay(rayOrigin, Vector2.up * directionY, Color.red);
-
+            raycastHits[i] = hit;
             if (hit) {
                 collisions.floorHit = hit;
-                if (hit.collider.tag == "PassablePlatform")
-                {
-                    if (directionY == 1 || hit.distance == 0)
-                    {
-                        continue;
-                    }
-                    if (collisions.fallingThroughPlatform)
-                    {
-                        continue;
-                    }
-                    if (playerInput.y == -1 && !collisions.Grabbing())
-                    {
+                if (hit.collider.tag == "PassablePlatform" && tag == "Player") {
+                    if (collisions.fallingThroughPlatform) { continue; }
+                    if (playerInput.y == -1 && !collisions.Grabbing()) {
                         collisions.fallingThroughPlatform = true;
                         Invoke("ResetFallingThroughPlatform", 0.2f);
                         continue;
                     }
+                    if (directionY == 1 || hit.distance == 0) { continue; }
                 }
-
                 moveAmount.y = (hit.distance - skinWidth) * directionY;
                 rayLength = hit.distance;
 
-                if (collisions.climbingSlope) {
+                if (collisions.climbingSlope)
+                {
                     moveAmount.x = moveAmount.y / Mathf.Tan(collisions.slopeAngle * Mathf.Deg2Rad) * Mathf.Sign(moveAmount.x);
                 }
 
@@ -218,6 +215,21 @@ public class Controller2D : RaycastController {
                 }
             }
         }
+        if (tag == "Player") {
+            if (raycastHits[verticalRayCount - 1].collider != null) {
+                if (raycastHits[verticalRayCount - 1].transform.GetComponent<PlatformController>() || raycastHits[verticalRayCount - 1].transform.tag == "PassablePlatform") {
+                    Bounds platformBounds = raycastHits[verticalRayCount - 1].collider.bounds;
+                    collisions.otherColliderLeftVertex = new Vector2(platformBounds.min.x, platformBounds.min.y);
+                    collisions.otherColliderRightVertex = new Vector2(platformBounds.max.x, platformBounds.max.y);
+                }
+            } else if (raycastHits[0].collider != null) {
+                if (raycastHits[0].transform.GetComponent<PlatformController>() || raycastHits[0].transform.tag == "PassablePlatform") {
+                    Bounds platformBounds = raycastHits[0].collider.bounds;
+                    collisions.otherColliderLeftVertex = new Vector2(platformBounds.min.x, platformBounds.max.y);
+                    collisions.otherColliderRightVertex = new Vector2(platformBounds.max.x, platformBounds.min.y);
+                }
+            }
+        }
     }
 
     void ResetFallingThroughPlatform() {
@@ -237,6 +249,9 @@ public class Controller2D : RaycastController {
 
         public RaycastHit2D floorHit;
         public bool fallingThroughPlatform;
+        //public bool Edge;
+        public Vector2 otherColliderLeftVertex;
+        public Vector2 otherColliderRightVertex;
 
         public void Reset() {
             above = below = false;

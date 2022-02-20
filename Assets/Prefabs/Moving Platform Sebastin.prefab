@@ -11,8 +11,10 @@ GameObject:
   - component: {fileID: 6640745601863213791}
   - component: {fileID: 6640745601863213784}
   - component: {fileID: 6640745601863213785}
-  - component: {fileID: 6640745601863213786}
+  - component: {fileID: 1672541201359123676}
+  - component: {fileID: 2576233196425271336}
   - component: {fileID: 6640745601863213790}
+  - component: {fileID: 2116007495194919359}
   m_Layer: 7
   m_Name: Moving Platform Sebastin
   m_TagString: Untagged
@@ -83,8 +85,8 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!61 &6640745601863213786
-BoxCollider2D:
+--- !u!68 &1672541201359123676
+EdgeCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -94,21 +96,36 @@ BoxCollider2D:
   m_Density: 1
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_UsedByEffector: 0
+  m_UsedByEffector: 1
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0, y: 0}
-    oldSize: {x: 0, y: 0}
-    newSize: {x: 0, y: 0}
-    adaptiveTilingThreshold: 0
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1}
+  m_Offset: {x: 0, y: 0.5}
   m_EdgeRadius: 0
+  m_Points:
+  - {x: -0.5, y: 0}
+  - {x: 0.5, y: 0}
+  m_AdjacentStartPoint: {x: 0, y: 0}
+  m_AdjacentEndPoint: {x: 0, y: 0}
+  m_UseAdjacentStartPoint: 0
+  m_UseAdjacentEndPoint: 0
+--- !u!251 &2576233196425271336
+PlatformEffector2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6640745601863213787}
+  m_Enabled: 1
+  m_UseColliderMask: 1
+  m_ColliderMask:
+    serializedVersion: 2
+    m_Bits: 448
+  m_RotationalOffset: 0
+  m_UseOneWay: 1
+  m_UseOneWayGrouping: 0
+  m_SurfaceArc: 180
+  m_UseSideFriction: 0
+  m_UseSideBounce: 0
+  m_SideArc: 1
 --- !u!114 &6640745601863213790
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -154,3 +171,34 @@ MonoBehaviour:
   cyclic: 0
   waitTime: 0
   easeAmount: 0
+--- !u!114 &2116007495194919359
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6640745601863213787}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c1588d6d1399ff4dbb48885468edc4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  collisionMask:
+    serializedVersion: 2
+    m_Bits: 0
+  edgeMask:
+    serializedVersion: 2
+    m_Bits: 0
+  objectMask:
+    serializedVersion: 2
+    m_Bits: 64
+  horizontalRayCount: 0
+  verticalRayCount: 0
+  armLengthRayCount: 0
+  horizontalRaySpacing: 0
+  verticalRaySpacing: 0
+  armLengthRaySpacing: 0
+  _collider: {fileID: 0}
+  maxSlopeAngle: 80
+  maxGrabAngle: 30
+  playerInput: {x: 0, y: 0}

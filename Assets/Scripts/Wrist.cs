@@ -5,7 +5,7 @@ using UnityEngine;
 public class Wrist : Player {
     ArmController armControllerScript;
     Player player;
-    bool isJumpingApex = false;
+
     public override void Awake() {
         player = transform.parent.parent.GetComponent<Player>();
         playerInfo = player.playerInfo;
@@ -20,66 +20,72 @@ public class Wrist : Player {
         PlayerManager.OnClimbLedge += ClimbLedge;
         PlayerManager.OnJumpInputUp += OnJumpInputUp;
         PlayerManager.OnGrabRelease += GrabRelease;
-        PlayerManager.OnDirectionalInput -= player.SetDirectionalInput;
-        PlayerManager.OnJumpInputDown -= player.OnJumpInputDown;
-        PlayerManager.OnJumpInputUp -= player.OnJumpInputUp;
+        //PlayerManager.OnDirectionalInput -= player.SetDirectionalInput;
+        //PlayerManager.OnJumpInputDown -= player.OnJumpInputDown;
+        //PlayerManager.OnJumpInputUp -= player.OnJumpInputUp;
 
     }
     private void OnDisable() {
         PlayerManager.OnDirectionalInput -= SetDirectionalInput;
         PlayerManager.OnJumpInputDown -= OnJumpInputDown;
+        PlayerManager.OnClimbLedge -= ClimbLedge;
         PlayerManager.OnJumpInputUp -= OnJumpInputUp;
         PlayerManager.OnGrabRelease -= GrabRelease;
-        PlayerManager.OnDirectionalInput += player.SetDirectionalInput;
-        PlayerManager.OnJumpInputDown += player.OnJumpInputDown;
-        PlayerManager.OnJumpInputUp += player.OnJumpInputUp;
+        //PlayerManager.OnDirectionalInput += player.SetDirectionalInput;
+        //PlayerManager.OnJumpInputDown += player.OnJumpInputDown;
+        //PlayerManager.OnJumpInputUp += player.OnJumpInputUp;
     }
 
     public override void Update() {
         CalculateVelocity();
         HandleWallSliding();
-        
-        //if (playerInfo.isJumping & !playerInfo.playerController.collisions.below)
-        //{
-        //    GrabRelease();
-        //}
+        LedgeEdgeCollision();
+
         playerInfo.playerController.Move(playerInfo.velocity * Time.deltaTime, playerInfo.directionalInput);
-        //ClimbLedge();
-        if (playerInfo.playerController.collisions.above || playerInfo.playerController.collisions.below)
-        {
-            if (playerInfo.playerController.collisions.slidingDownMaxSlope)
-            {
+        if (playerInfo.playerController.collisions.above || playerInfo.playerController.collisions.below) {
+            if (playerInfo.playerController.collisions.slidingDownMaxSlope) {
                 playerInfo.velocity.y += playerInfo.playerController.collisions.slopeNormal.y * -playerInfo.gravity * Time.deltaTime;
-            }
-            else
-            {
+            } else {
                 playerInfo.velocity.y = 0;
             }
         }
+        //else if (Mathf.Sign(playerInfo.velocity.y) < 0) {
+        //    print("falling grab release");
+        //    GrabRelease();
+        //}
         
     }
 
-    public void ClimbLedge() {
-        if (playerInfo.playerController.collisions.floorHit)
+    public void LedgeEdgeCollision() {
+        if (playerInfo.playerController.collisions.floorHit.collider.tag == "PassablePlatform")
         {
-            if (playerInfo.playerController.collisions.floorHit.collider.tag == "PassablePlatform")
+            if (transform.position.x <= playerInfo.playerController.collisions.otherColliderLeftVertex.x)
             {
+                if (Mathf.Sign(playerInfo.directionalInput.x) == -1)
+                {
+                    playerInfo.velocity.x = 0;
+                }
+            }
+            if (transform.position.x >= playerInfo.playerController.collisions.otherColliderRightVertex.x)
+            {
+                if (Mathf.Sign(playerInfo.directionalInput.x) == 1)
+                {
+                    playerInfo.velocity.x = 0;
+                }
+            }
+        }
+
+    }
+
+    public void ClimbLedge() {
+        if (playerInfo.playerController.collisions.floorHit) {
+            if (playerInfo.playerController.collisions.floorHit.collider.tag == "PassablePlatform") {
                 if (playerInfo.playerController.collisions.below && !playerInfo.ledgeGrabbing) {
                     playerInfo.velocity.y = playerInfo.maxJumpVelocity;
                 }
-                
-                //if (playerInfo.directionalInput.y == 1)
-                //{
-                    
-                //}
             }
         }
     }
-
-    //private void LateUpdate()
-    //{
-    //    if (playerInfo.isJumpingApex) { GrabRelease(); }
-    //}
 
     void CalculateVelocity() {
         float targetVelocityX = playerInfo.directionalInput.x * playerInfo.playerManager.moveSpeed;
@@ -89,8 +95,6 @@ public class Wrist : Player {
 
     public override void OnJumpInputUp()
     {
-        //base.OnJumpInputUp();
-        //isJumpingApex = true;
         if (playerInfo.velocity.y > playerInfo.minJumpVelocity)
         {
             playerInfo.velocity.y = playerInfo.minJumpVelocity;

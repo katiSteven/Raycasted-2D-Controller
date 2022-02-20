@@ -57,7 +57,7 @@ public class Arm : MonoBehaviour {
         BoxCollider2D wristBoxCollider2D = wristObject.GetComponent<BoxCollider2D>();
         //wristObject.transform.position = wristObject.transform.InverseTransformPoint(contactPoint.collider.ClosestPoint(contactPoint.point) + new Vector2(0f, wristBoxCollider2D.bounds.center.y));
         //wristObject.transform.position = new Vector2(0f, wristBoxCollider2D.bounds.center.y);
-        wristObject.transform.position = contactPoint.collider.ClosestPoint(contactPoint.point) + new Vector2(0f, wristObject.transform.localScale.y);
+        wristObject.transform.position = contactPoint.collider.ClosestPoint(contactPoint.point) + new Vector2(wristObject.transform.localScale.x, wristObject.transform.localScale.y) * playerInfo.grabDirectionalInput;
         playerInfo.wrist = wristObject.GetComponent<Wrist>();
         GetComponentInParent<Player>().enabled = false;
     }
