@@ -37,7 +37,8 @@ public class RaycastController : MonoBehaviour
     public virtual void Awake() {
         //_collider = (GetComponent<EdgeCollider2D>())? GetComponent<EdgeCollider2D>() : GetComponent<BoxCollider2D>();
         if (GetComponent<EdgeCollider2D>()) { _collider = GetComponent<EdgeCollider2D>(); }
-        else { _collider = GetComponent<BoxCollider2D>(); }
+        else if (GetComponent<BoxCollider2D>()) { _collider = GetComponent<BoxCollider2D>(); }
+        //else { _collider = GetComponent<CapsuleCollider2D>(); }
         playerManager = FindObjectOfType<PlayerManager>();
         armLength = playerManager.ArmLength;
     }

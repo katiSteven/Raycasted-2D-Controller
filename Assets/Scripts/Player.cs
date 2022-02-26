@@ -25,7 +25,7 @@ public class Player : MonoBehaviour {
         PlayerManager.OnJumpInputUp -= OnJumpInputUp;
     }
 
-    void Start() {
+    private void Start() {
         playerInfo.gravity = -(2 * playerInfo.playerManager.maxJumpHeight) / Mathf.Pow(playerInfo.playerManager.timeToJumpApex, 2);
         playerInfo.maxJumpVelocity = Mathf.Abs(playerInfo.gravity) * playerInfo.playerManager.timeToJumpApex;
         playerInfo.minJumpVelocity = Mathf.Sqrt(2 * Mathf.Abs(playerInfo.gravity) * playerInfo.playerManager.minJumpHeight);
@@ -53,7 +53,7 @@ public class Player : MonoBehaviour {
     }
 
     public void OnJumpInputDown() {
-        //playerInfo.isJumpingApex = true;
+        playerInfo.isJumpingApex = true;
         if (playerInfo.wallSliding) {
             if (playerInfo.wallDirX == playerInfo.directionalInput.x) {
                 playerInfo.velocity.x = -playerInfo.wallDirX * playerInfo.playerManager.wallJumpClimb.x;

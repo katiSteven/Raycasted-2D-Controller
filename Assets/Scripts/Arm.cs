@@ -51,13 +51,24 @@ public class Arm : MonoBehaviour {
 
     public void InstantiateWristCollider(RaycastHit2D contactPoint) { //Offset-> (0,0.9), Size -> (1,0.5)
         GameObject wristObject = Instantiate(playerInfo.playerManager.wristPrefab, transform);
+        //GameObject wristObject = Instantiate(playerInfo.playerManager.wristPrefab);
         //playerInfo.wrist.gameObject.SetActive(true);
         //GameObject wristObject = playerInfo.wrist.gameObject;
 
-        BoxCollider2D wristBoxCollider2D = wristObject.GetComponent<BoxCollider2D>();
+        //BoxCollider2D wristBoxCollider2D = wristObject.GetComponent<BoxCollider2D>();
         //wristObject.transform.position = wristObject.transform.InverseTransformPoint(contactPoint.collider.ClosestPoint(contactPoint.point) + new Vector2(0f, wristBoxCollider2D.bounds.center.y));
         //wristObject.transform.position = new Vector2(0f, wristBoxCollider2D.bounds.center.y);
-        wristObject.transform.position = contactPoint.collider.ClosestPoint(contactPoint.point) + new Vector2(wristObject.transform.localScale.x, wristObject.transform.localScale.y) * playerInfo.grabDirectionalInput;
+        if (Mathf.Sign(playerInfo.directionalInput.x) != Mathf.Sign(playerInfo.grabDirectionalInput.x))
+        {
+            wristObject.transform.position = contactPoint.collider.ClosestPoint(contactPoint.point) + new Vector2(wristObject.transform.localScale.x, /*wristObject.transform.localScale.y +*/ playerInfo.playerManager.ArmLength * 0.75f) * playerInfo.grabDirectionalInput;
+        }
+        else
+        {
+            wristObject.transform.position = contactPoint.collider.ClosestPoint(contactPoint.point) + new Vector2(-wristObject.transform.localScale.x, /*wristObject.transform.localScale.y +*/ playerInfo.playerManager.ArmLength * 0.75f) * playerInfo.grabDirectionalInput;
+        }
+        //wristObject.transform.position = contactPoint.collider.ClosestPoint(contactPoint.point) + new Vector2(wristObject.transform.localScale.x, wristObject.transform.localScale.y + playerInfo.playerManager.ArmLength) * playerInfo.grabDirectionalInput;
+
+
         playerInfo.wrist = wristObject.GetComponent<Wrist>();
         GetComponentInParent<Player>().enabled = false;
     }

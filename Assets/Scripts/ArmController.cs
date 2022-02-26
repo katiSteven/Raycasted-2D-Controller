@@ -30,7 +30,7 @@ public class ArmController : RaycastController
 
             Debug.DrawRay(rayOrigin, ((input.x == 0f) ? new Vector2(directionX, directionY) : Vector2.up * directionY) * playerManager.WristLength, Color.red);
 
-            if (hit) {
+            if (hit && hit.transform.tag == "PassablePlatform" && hit.distance > 0.05f) {
                 float slopeAngle = Vector2.Angle(Vector2.down, hit.normal);
                 //print("hit normal: " + hit.normal + " hit.distance: " + hit.distance + " Grab Angle: " + slopeAngle);
                 if (slopeAngle <= playerInfo.playerController.maxGrabAngle && hit.distance > 0f) {

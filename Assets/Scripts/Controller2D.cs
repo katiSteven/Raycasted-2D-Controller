@@ -245,7 +245,7 @@ public class Controller2D : RaycastController {
                 collisions.otherColliderRightVertex = new Vector2(platformBounds.max.x, platformBounds.max.y);
             }
         }
-        else if (raycastHits[0].collider != null)
+        if (raycastHits[0].collider != null)
         {
             if (raycastHits[0].transform.GetComponent<PlatformController>() || raycastHits[0].transform.tag == "PassablePlatform")
             {
@@ -254,11 +254,15 @@ public class Controller2D : RaycastController {
                 collisions.otherColliderRightVertex = new Vector2(platformBounds.max.x, platformBounds.min.y);
             }
         }
+        if(raycastHits[verticalRayCount - 1].collider == null && raycastHits[0].collider == null && raycastHits[verticalRayCount / 2].collider == null) {
+            collisions.otherColliderLeftVertex = new Vector2(float.NegativeInfinity, float.NegativeInfinity);
+            collisions.otherColliderRightVertex = new Vector2(float.PositiveInfinity, float.PositiveInfinity);
+        }
     }
 
-    public void WristLedgeCollisions() {
+    //public void WristLedgeCollisions() {
         
-    }
+    //}
 
     void ResetFallingThroughPlatform() {
         collisions.fallingThroughPlatform = false;

@@ -5,6 +5,7 @@ using UnityEngine;
 public class Wrist : Player {
     ArmController armControllerScript;
     Player player;
+    float armLength;
 
     public override void Awake() {
         player = transform.parent.parent.GetComponent<Player>();
@@ -13,6 +14,21 @@ public class Wrist : Player {
         playerInfo.playerController._collider = GetComponent<BoxCollider2D>();
         playerInfo.playerController.CalculateRaySpacing();
     }
+
+    //public override void Start()
+    //{
+    //    //base.Start();
+    //    playerInfo.gravity = -(2 * playerInfo.playerManager.maxJumpHeight) / Mathf.Pow(playerInfo.playerManager.timeToJumpApex, 2);
+    //    playerInfo.maxJumpVelocity = Mathf.Abs(playerInfo.gravity) * playerInfo.playerManager.timeToJumpApex;
+    //    playerInfo.minJumpVelocity = Mathf.Sqrt(2 * Mathf.Abs(playerInfo.gravity) * playerInfo.playerManager.minJumpHeight);
+    //    print("Gravity: " + playerInfo.gravity + " Jump Velocity: " + playerInfo.maxJumpVelocity);
+
+    //    player = transform.parent.parent.GetComponent<Player>();
+    //    playerInfo = player.playerInfo;
+    //    armControllerScript = GetComponentInParent<ArmController>();
+    //    playerInfo.playerController._collider = GetComponent<BoxCollider2D>();
+    //    playerInfo.playerController.CalculateRaySpacing();
+    //}
 
     private void OnEnable() {
         PlayerManager.OnDirectionalInput += SetDirectionalInput;
@@ -40,7 +56,7 @@ public class Wrist : Player {
         CalculateVelocity();
         HandleWallSliding();
         LedgeEdgeCollision();
-
+        
         playerInfo.playerController.Move(playerInfo.velocity * Time.deltaTime, playerInfo.directionalInput);
         if (playerInfo.playerController.collisions.above || playerInfo.playerController.collisions.below) {
             if (playerInfo.playerController.collisions.slidingDownMaxSlope) {
@@ -49,24 +65,54 @@ public class Wrist : Player {
                 playerInfo.velocity.y = 0;
             }
         }
+        //player.transform.Translate(transform.position * Time.deltaTime, transform);
+        //transform.Translate(player.transform.position * Time.deltaTime, Space.Self);
+        //if (Mathf.Abs(player.transform.position.y - transform.position.y) >= playerInfo.playerManager.ArmLength*2) {
+        //    player.transform.position = Vector2.MoveTowards(player.transform.position, new Vector2(transform.position.x, transform.position.y), 0.05f);
+        //    transform.position = Vector2.MoveTowards(transform.position, new Vector2(player.transform.position.x, player.transform.position.y), 0.05f);
+        //}
+        //player.transform.position = Vector2.MoveTowards(player.transform.position, new Vector2(transform.position.x, player.transform.position.y), 0.05f);
+        //transform.position = Vector2.MoveTowards(transform.position, new Vector2(player.transform.position.x, transform.position.y), 0.05f);
+        if (Mathf.Abs(player.transform.position.y - transform.position.y) >= playerInfo.playerManager.ArmLength * 2)
+        {
+            player.transform.position = Vector2.MoveTowards(player.transform.position, new Vector2(transform.position.x, transform.position.y + playerInfo.playerManager.ArmLength * 2), 0.05f);
+            transform.position = Vector2.MoveTowards(transform.position, new Vector2(player.transform.position.x, player.transform.position.y + playerInfo.playerManager.ArmLength * 2), 0.05f);
+        }
+        else
+        {
+            player.transform.position = Vector2.MoveTowards(player.transform.position, new Vector2(transform.position.x, player.transform.position.y), 0.05f);
+            transform.position = Vector2.MoveTowards(transform.position, new Vector2(player.transform.position.x, transform.position.y), 0.05f);
+        }
+        
         //else if (Mathf.Sign(playerInfo.velocity.y) < 0) {
         //    print("falling grab release");
         //    GrabRelease();
         //}
-        
+
     }
+
+    
+    //private void FixedUpdate()
+    //{
+        
+    //}
+
+    //private void LateUpdate()
+    //{
+        
+    //}
 
     public void LedgeEdgeCollision() {
         if (playerInfo.playerController.collisions.floorHit.collider.tag == "PassablePlatform")
         {
-            if (transform.position.x <= playerInfo.playerController.collisions.otherColliderLeftVertex.x)
+            if (playerInfo.playerController._collider.bounds.min.x <= playerInfo.playerController.collisions.otherColliderLeftVertex.x)
             {
                 if (Mathf.Sign(playerInfo.directionalInput.x) == -1)
                 {
                     playerInfo.velocity.x = 0;
                 }
             }
-            if (transform.position.x >= playerInfo.playerController.collisions.otherColliderRightVertex.x)
+            if (playerInfo.playerController._collider.bounds.max.x >= playerInfo.playerController.collisions.otherColliderRightVertex.x)
             {
                 if (Mathf.Sign(playerInfo.directionalInput.x) == 1)
                 {
@@ -139,7 +185,7 @@ public class Wrist : Player {
 
         player.enabled = true;
         playerInfo.velocity.x = 0f;
-        playerInfo.playerController._collider = player.GetComponent<BoxCollider2D>();
+        playerInfo.playerController._collider = player.GetComponent<BoxCollider2D>();/*GetComponent<CapsuleCollider2D>();*/
         playerInfo.playerController.CalculateRaySpacing();
         //gravity = 0;
         Destroy(gameObject, 0.25f);
