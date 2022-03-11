@@ -173,14 +173,14 @@ public class Controller2D : RaycastController {
     void VerticalCollisions(ref Vector2 moveAmount) {
         float directionY = Mathf.Sign(moveAmount.y);
         float rayLength = Mathf.Abs(moveAmount.y) + skinWidth;
-        RaycastHit2D[] raycastHits = new RaycastHit2D[verticalRayCount];
+        collisions.raycastHits = new RaycastHit2D[verticalRayCount];
         for (int i = 0; i < verticalRayCount; i++) {
             Vector2 rayOrigin = (directionY == -1) ? raycastOrigins.bottomLeft : raycastOrigins.topLeft;
             rayOrigin += Vector2.right * (verticalRaySpacing * i + moveAmount.x);
             RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.up * directionY, rayLength, collisionMask);
 
             Debug.DrawRay(rayOrigin, Vector2.up * directionY, Color.red);
-            raycastHits[i] = hit;
+            collisions.raycastHits[i] = hit;
             if (hit) {
                 collisions.floorHit = hit;
                 if (hit.collider.tag == "PassablePlatform" && tag == "Player") {
@@ -224,7 +224,7 @@ public class Controller2D : RaycastController {
         }
         if (tag == "Player")
         {
-            WristLedgeCollisions(raycastHits);
+            WristLedgeCollisions(collisions.raycastHits, ref moveAmount);
         }
     }
 
@@ -234,7 +234,7 @@ public class Controller2D : RaycastController {
         return new Vector2(v.x - normal.x * dp, v.y - normal.y * dp);
     }
 
-    private void WristLedgeCollisions(RaycastHit2D[] raycastHits)
+    private void WristLedgeCollisions(RaycastHit2D[] raycastHits, ref Vector2 moveAmount)
     {
         if (raycastHits[verticalRayCount - 1].collider != null)
         {
@@ -257,11 +257,25 @@ public class Controller2D : RaycastController {
         if(raycastHits[verticalRayCount - 1].collider == null && raycastHits[0].collider == null && raycastHits[verticalRayCount / 2].collider == null) {
             collisions.otherColliderLeftVertex = new Vector2(float.NegativeInfinity, float.NegativeInfinity);
             collisions.otherColliderRightVertex = new Vector2(float.PositiveInfinity, float.PositiveInfinity);
+
+            Vector2 rayOrigin = raycastOrigins.bottomEdge /*raycastHits[verticalRayCount / 2].*/;
+            RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.down, transform.localScale.y * 4, collisionMask);
+
+            Debug.DrawRay(rayOrigin, Vector2.down * transform.localScale.y * 4, Color.yellow);
+            if (hit) {
+                if (hit.collider.tag != "PassablePlatform" && Mathf.Abs(hit.distance) <= transform.localScale.y * 2) {
+                    collisions.longWayDown = true;
+                }
+                else { collisions.longWayDown = false; }
+                //moveAmount.y = 0;
+            }
+            //else { collisions.longWayDown = false; }
         }
     }
 
-    //public void WristLedgeCollisions() {
-        
+    //public void WristLedgeCollisions()
+    //{
+
     //}
 
     void ResetFallingThroughPlatform() {
@@ -280,7 +294,9 @@ public class Controller2D : RaycastController {
         public int faceDir;
 
         public RaycastHit2D floorHit;
+        public RaycastHit2D[] raycastHits;
         public bool fallingThroughPlatform;
+        public bool longWayDown;
         //public bool Edge;
         public Vector2 otherColliderLeftVertex;
         public Vector2 otherColliderRightVertex;
