@@ -22,6 +22,7 @@ public class Player : MonoBehaviour {
         pMD.pI.player = this;
         pMD.pI.playerController = GetComponent<Controller2D>();
         pMD.pI.arm = GetComponentInChildren<Arm>();
+        pMD.pI.playerLimbs = GetComponentInChildren<PlayerLimbs>();
     }
 
     private void OnEnable() {
@@ -48,6 +49,7 @@ public class Player : MonoBehaviour {
         HandleWallSliding();
 
         pMD.pI.playerController.Move(pMD.pI.velocity * Time.deltaTime, pMD.pI.directionalInput);
+        pMD.pI.playerLimbs.Move(pMD.pI.velocity * Time.deltaTime, pMD.pI.directionalInput);
         if (pMD.pI.playerController.collisions.above || pMD.pI.playerController.collisions.below)
         {
             if (pMD.pI.playerController.collisions.slidingDownMaxSlope)
@@ -127,7 +129,8 @@ public class Player : MonoBehaviour {
 
     void CalculateVelocity() {
         float targetVelocityX = pMD.pI.directionalInput.x * pMD.pI.playerManager.moveSpeed;
-        pMD.pI.velocity.x = Mathf.SmoothDamp(pMD.pI.velocity.x, targetVelocityX, ref pMD.pI.velocityXSmoothing, (pMD.pI.playerController.collisions.below) ? pMD.pI.playerManager.accelerationTimeGrounded : pMD.pI.playerManager.accelerationTimeAirborne);
+        pMD.pI.velocity.x = Mathf.SmoothDamp(pMD.pI.velocity.x, targetVelocityX, ref pMD.pI.velocityXSmoothing, 
+            (pMD.pI.playerController.collisions.below) ? pMD.pI.playerManager.accelerationTimeGrounded : pMD.pI.playerManager.accelerationTimeAirborne);
         pMD.pI.velocity.y += pMD.pI.gravity * Time.deltaTime;
     }
 }

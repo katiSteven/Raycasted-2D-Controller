@@ -28,6 +28,7 @@ public class PlayerMetaData : MonoBehaviour
         public PlayerManager playerManager;
         public Player player;
         public Controller2D playerController;
+        public PlayerLimbs playerLimbs;
 
         public Arm arm;
         public Wrist wrist;
@@ -55,6 +56,7 @@ public class PlayerMetaData : MonoBehaviour
             playerManager = null;
             player = null;
             playerController = null;
+            playerLimbs = null;
 
             arm = null;
             wrist = null;
@@ -63,7 +65,6 @@ public class PlayerMetaData : MonoBehaviour
             wallDirX = 0;
             isJumpingApex = false;
             ledgeGrabbing = false;
-
 
         }
     }

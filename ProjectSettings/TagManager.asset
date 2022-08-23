@@ -7,6 +7,8 @@ TagManager:
   - PassablePlatform
   - Wrist
   - Equipment
+  - LimbSolver
+  - Limb
   layers:
   - Default
   - TransparentFX
