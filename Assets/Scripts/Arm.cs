@@ -73,10 +73,12 @@ public class Arm : MonoBehaviour {
     }
 
     public void GrabInputdown(Vector2 grabDirectionalInput) {
-        if (pMD.pI.wrist == null || !pMD.pI.wrist.isActiveAndEnabled) {
-            RaycastHit2D contactPoint = armController.GrappleCollisions(pMD.pI.velocity * Time.deltaTime, grabDirectionalInput);
-            if (contactPoint.collider != null) {
-                InstantiateWristCollider(contactPoint);
+        if (grabDirectionalInput != Vector2.zero) {
+            if (pMD.pI.wrist == null || !pMD.pI.wrist.isActiveAndEnabled) {
+                RaycastHit2D contactPoint = armController.GrappleCollisions(pMD.pI.velocity * Time.deltaTime);
+                if (contactPoint.collider != null) {
+                    InstantiateWristCollider(contactPoint);
+                }
             }
         }
     }
@@ -90,7 +92,7 @@ public class Arm : MonoBehaviour {
         } else {
             wristObject = Instantiate(pMD.pI.playerManager.wristPrefab, transform);
         }
-        
+
         //GameObject wristObject = Instantiate(playerInfo.playerManager.wristPrefab);
         //playerInfo.wrist.gameObject.SetActive(true);
         //GameObject wristObject = playerInfo.wrist.gameObject;
@@ -98,14 +100,21 @@ public class Arm : MonoBehaviour {
         //BoxCollider2D wristBoxCollider2D = wristObject.GetComponent<BoxCollider2D>();
         //wristObject.transform.position = wristObject.transform.InverseTransformPoint(contactPoint.collider.ClosestPoint(contactPoint.point) + new Vector2(0f, wristBoxCollider2D.bounds.center.y));
         //wristObject.transform.position = new Vector2(0f, wristBoxCollider2D.bounds.center.y);
-        if (Mathf.Sign(pMD.pI.directionalInput.x) != Mathf.Sign(pMD.pI.grabDirectionalInput.x))
-        {
-            wristObject.transform.position = contactPoint.collider.ClosestPoint(contactPoint.point) + new Vector2(wristObject.transform.localScale.x, /*wristObject.transform.localScale.y +*/ pMD.pI.playerManager.ArmLength * 0.75f) * pMD.pI.grabDirectionalInput;
-        }
-        else
-        {
-            wristObject.transform.position = contactPoint.collider.ClosestPoint(contactPoint.point) + new Vector2(-wristObject.transform.localScale.x, /*wristObject.transform.localScale.y +*/ pMD.pI.playerManager.ArmLength * 0.75f) * pMD.pI.grabDirectionalInput;
-        }
+        wristObject.transform.position = contactPoint.collider.ClosestPoint(contactPoint.point) +
+                new Vector2(wristObject.transform.localScale.x, /*wristObject.transform.localScale.y +*/ pMD.pI.playerManager.ArmLength * 0.75f) *
+                pMD.pI.grabDirectionalInput;
+        //if (Mathf.Sign(pMD.pI.directionalInput.x) != Mathf.Sign(pMD.pI.grabDirectionalInput.x))
+        //{
+        //    wristObject.transform.position = contactPoint.collider.ClosestPoint(contactPoint.point) +
+        //        new Vector2(wristObject.transform.localScale.x, /*wristObject.transform.localScale.y +*/ pMD.pI.playerManager.ArmLength * 0.75f) * 
+        //        pMD.pI.grabDirectionalInput;
+        //}
+        //else
+        //{
+        //    wristObject.transform.position = contactPoint.collider.ClosestPoint(contactPoint.point) + 
+        //        new Vector2(-wristObject.transform.localScale.x, /*wristObject.transform.localScale.y +*/ pMD.pI.playerManager.ArmLength * 0.75f) * 
+        //        pMD.pI.grabDirectionalInput;
+        //}
         //wristObject.transform.position = contactPoint.collider.ClosestPoint(contactPoint.point) + new Vector2(wristObject.transform.localScale.x, wristObject.transform.localScale.y + playerInfo.playerManager.ArmLength) * playerInfo.grabDirectionalInput;
 
 

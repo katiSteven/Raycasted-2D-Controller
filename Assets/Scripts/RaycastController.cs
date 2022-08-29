@@ -33,6 +33,8 @@ public class RaycastController : MonoBehaviour
 
     protected PlayerManager playerManager;
 
+    Vector2[] wristPlacementList;
+
     public virtual void Awake() {
         //_collider = (GetComponent<EdgeCollider2D>())? GetComponent<EdgeCollider2D>() : GetComponent<BoxCollider2D>();
         if (GetComponent<EdgeCollider2D>()) { _collider = GetComponent<EdgeCollider2D>(); }
@@ -40,6 +42,8 @@ public class RaycastController : MonoBehaviour
         //else { _collider = GetComponent<CapsuleCollider2D>(); }
         playerManager = FindObjectOfType<PlayerManager>();
         armLength = playerManager.ArmLength;
+
+        
     }
     public virtual void Start() {
         CalculateRaySpacing();
@@ -78,15 +82,32 @@ public class RaycastController : MonoBehaviour
         armLengthRaySpacing = armLength / (armLengthRayCount - 1);
     }
 
+    public Vector2 OriginPlacement(int index) {
+        //if (index==1) { return new Vector2(-1f,-1f); }
+        //else 
+        //if (index==0) { return new Vector2(-1f, 0f); }
+        //else 
+        if (index==1) { return new Vector2(-1f, 1f); }
+        else if (index==2) { return new Vector2(0f, 1f); }
+        else if (index==3) { return new Vector2(1f, 1f); }
+        //else if (index==4) { return new Vector2(1f, 0f); }
+        //else if (index==7) { return new Vector2(1f, -1f); }
+        //else if (index==8) { return new Vector2(0f, -1f); }
+        return Vector2.zero;
+    }
+
     public Vector2 CalculateFinalWristPlacement(Vector2 input) {
-        if (input.x == -1f && input.y == -1f) { return raycastOrigins.leftEdge; }
-        else if (input.x == -1f && input.y == 0f) { return raycastOrigins.leftEdge; }
-        else if (input.x == -1f && input.y == 1f) { return raycastOrigins.topLeft; }
+
+        //if (input.x == -1f && input.y == -1f) { return raycastOrigins.leftEdge; }
+        //else 
+        //if (input.x == -1f && input.y == 0f) { return raycastOrigins.leftEdge; }
+        //else 
+        if (input.x == -1f && input.y == 1f) { return raycastOrigins.topLeft; }
         else if (input.x == 0f && input.y == 1f) { return raycastOrigins.topEdge; }
         else if (input.x == 1f && input.y == 1f) { return raycastOrigins.topRight; }
-        else if (input.x == 1f && input.y == 0f) { return raycastOrigins.rightEdge; }
-        else if (input.x == 1f && input.y == -1f) { return raycastOrigins.rightEdge; }
-        else if (input.x == 0f && input.y == -1f) { return raycastOrigins.center; }
+        //else if (input.x == 1f && input.y == 0f) { return raycastOrigins.rightEdge; }
+        //else if (input.x == 1f && input.y == -1f) { return raycastOrigins.rightEdge; }
+        //else if (input.x == 0f && input.y == -1f) { return raycastOrigins.center; }
         return Vector2.zero;
     }
 

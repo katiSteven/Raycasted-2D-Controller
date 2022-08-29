@@ -45,26 +45,33 @@ public class ArmController : RaycastController
         UpdateRaycastOrigins();
     }
 
-    public RaycastHit2D GrappleCollisions(Vector2 moveAmount, Vector2 input)
+    public RaycastHit2D GrappleCollisions(Vector2 moveAmount)
     {
         float directionY = Mathf.Sign(moveAmount.y);
         float directionX = pMD.pI.playerController.collisions.faceDir;
+        
+        for(int j = 0; j < 5; j++)
+        {
+            Vector2 input = OriginPlacement(j);
+            Vector2 rayCastOrigins = CalculateFinalWristPlacement(input);
+            for (int i = 0; i < armLengthRayCount; i++)
+            {
+                Vector2 rayOrigin = rayCastOrigins;
+                rayOrigin += input * (armLengthRaySpacing * i + moveAmount.x);
+                RaycastHit2D hit = Physics2D.Raycast(rayOrigin, ((input.x == 0f) ? new Vector2(directionX, directionY) : Vector2.up * directionY), playerManager.WristLength, collisionMask);
 
-        Vector2 rayCastOrigins = CalculateFinalWristPlacement(input);
-        for (int i = 0; i < armLengthRayCount; i++) {
-            Vector2 rayOrigin = rayCastOrigins;
-            rayOrigin += input * (armLengthRaySpacing * i + moveAmount.x);
-            RaycastHit2D hit = Physics2D.Raycast(rayOrigin, ((input.x == 0f) ? new Vector2(directionX, directionY) : Vector2.up * directionY), playerManager.WristLength, collisionMask);
+                Debug.DrawRay(rayOrigin, ((input.x == 0f) ? new Vector2(directionX, directionY) : Vector2.up * directionY) * playerManager.WristLength, Color.red);
 
-            Debug.DrawRay(rayOrigin, ((input.x == 0f) ? new Vector2(directionX, directionY) : Vector2.up * directionY) * playerManager.WristLength, Color.red);
-
-            if (hit && hit.transform.tag == "PassablePlatform" && hit.distance > 0.05f) {
-                float slopeAngle = Vector2.Angle(Vector2.down, hit.normal);
-                //print("hit normal: " + hit.normal + " hit.distance: " + hit.distance + " Grab Angle: " + slopeAngle);
-                if (slopeAngle <= pMD.pI.playerController.maxGrabAngle && hit.distance > 0f) {
-                    GrabCollisionDetection(rayCastOrigins);
-                    //pMD.pI.velocity = Vector2.zero;
-                    return hit;
+                if (hit && hit.transform.tag == "PassablePlatform" && hit.distance > 0.05f)
+                {
+                    float slopeAngle = Vector2.Angle(Vector2.down, hit.normal);
+                    //print("hit normal: " + hit.normal + " hit.distance: " + hit.distance + " Grab Angle: " + slopeAngle);
+                    if (slopeAngle <= pMD.pI.playerController.maxGrabAngle && hit.distance > 0f)
+                    {
+                        GrabCollisionDetection(rayCastOrigins);
+                        //pMD.pI.velocity = Vector2.zero;
+                        return hit;
+                    }
                 }
             }
         }
